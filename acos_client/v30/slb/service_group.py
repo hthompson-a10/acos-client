@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import acos_client.errors as acos_errors
 import acos_client.v30.base as base
 
 from member import Member
@@ -97,22 +96,15 @@ class ServiceGroup(base.BaseV30):
             self._put(self.url_prefix + name, params, **kwargs)
 
     def create(self, name, protocol=TCP, lb_method=ROUND_ROBIN, **kwargs):
-        try:
-            self.get(name)
-        except acos_errors.NotFound:
-            pass
-        else:
-            raise acos_errors.Exists
-
-        self._set(name, protocol, lb_method, **kwargs)
+        return self._set(name, protocol, lb_method, **kwargs)
 
     def update(self, name, protocol=None, lb_method=None, health_monitor=None,
                **kwargs):
-        self._set(name, protocol, lb_method,
-                  health_monitor, update=True, **kwargs)
+        return self._set(name, protocol, lb_method,
+                         health_monitor, update=True, **kwargs)
 
     def delete(self, name):
-        self._delete(self.url_prefix + name)
+        return self._delete(self.url_prefix + name)
 
     def stats(self, name, *args, **kwargs):
         return self._get(self.url_prefix + name + "/stats", **kwargs)
