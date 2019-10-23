@@ -16,6 +16,9 @@ from acos_client import errors as acos_errors
 from acos_client.v30 import base
 from acos_client.v30.vrrpa.blade_params import BladeParameters
 
+import logging
+
+LOG = logging.getLogger(__name__)
 
 class VRID(base.BaseV30):
 
@@ -38,32 +41,35 @@ class VRID(base.BaseV30):
         except acos_errors.NotFound:
             return False
 
-    def _build_params(self, vrid_val, threshold=None, disable=None, floating_ips=[]):
-        vrid = {'vrid-val': vrid_val}
+    def _build_params(self, vrid_val, threshold=None, disable=None, floating_ips=[], shared=True):
+        vrid = {"vrid-val": vrid_val}
+
+        ip_container_key = "ip-address-cfg" if shared else "ip-address-part-cfg"
+        ip_key = "ip-address" if shared else "ip-address-partition"
 
         if threshold or disable:
             threshold = threshold if threshold in range(0, 256) else 1
             disable = disable if disable in [0, 1] else 0
             preempt = {
-                'threshold': threshold,
-                'disable': disable
+                "threshold": threshold,
+                "disable": disable
             }
 
-            vrid['preempt-mode'] = preempt
-        # If floating IPs are spec'd, add them to the dictionary.
+            vrid["preempt-mode"] = preempt
+        # If floating IPs are spec"d, add them to the dictionary.
         if len(floating_ips) > 0:
-            vrid["floating-ip"] = {"ip-address-cfg": [{"ip-address": x} for x in floating_ips]} 
+            vrid["floating-ip"] = {ip_container_key: [{ip_key: x} for x in floating_ips]} 
 
-
-        payload = {'vrid': vrid}
+        payload = {"vrid": vrid}
+        LOG.info("VRID.update: {0}".format(str(payload)))
 
         return payload
 
-    def create(self, vrid_val, threshold=None, disable=None, floating_ips=[]):
-        return self._post(self.base_url, self._build_params(vrid_val, threshold, disable, floating_ips))
+    def create(self, vrid_val, threshold=None, disable=None, floating_ips=[], shared=True):
+        return self._post(self.base_url, self._build_params(vrid_val, threshold, disable, floating_ips, shared))
 
-    def update(self, vrid_val, threshold=None, disable=None, floating_ips=[]):
-        return self._put(self.base_url + str(vrid_val), self._build_params(vrid_val, threshold, disable, floating_ips))
+    def update(self, vrid_val, threshold=None, disable=None, floating_ips=[], shared=True):
+        return self._put(self.base_url + str(vrid_val), self._build_params(vrid_val, threshold, disable, floating_ips, shared))
 
     def delete(self, vrid_val):
         return self._delete(self.base_url + str(vrid_val))
