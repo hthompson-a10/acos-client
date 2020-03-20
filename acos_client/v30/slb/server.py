@@ -34,7 +34,7 @@ class Server(base.BaseV30):
                 "name": name,
                 "action": 'enable' if status else 'disable',
                 "conn-resume": kwargs.get("conn_resume", None),
-                "conn-limit": kwargs.get("conn_limit", 8000000),
+                "conn-limit": kwargs.get("conn_limit", None),
             }
         }
 
@@ -69,7 +69,7 @@ class Server(base.BaseV30):
                 "name": name,
                 "action": 'enable' if status else 'disable',
                 "conn-resume": kwargs.get("conn_resume", None),
-                "conn-limit": kwargs.get("conn_limit", 8000000),
+                "conn-limit": kwargs.get("conn_limit", None),
             }
         }
 
